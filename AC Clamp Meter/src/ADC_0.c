@@ -17,9 +17,11 @@ void ADC_init()
 	        | (1 << ADPS2) 
 	        | (1 << ADPS1) 
 	        | (1 << ADPS0);		    // Prescaler set to clk/128
-	ADCSRA |= (1 << ADATE);		
-	ADCSRB |= (1 << ADTS1)
-			| (1 << ADTS0);
+	ADCSRA |= (0 << ADATE);			// Auto-trigger disabled
+	
+	ADCSRB  = (0 << ADTS2)
+			| (0 << ADTS1)
+			| (0 << ADTS0);			// Trigger source: Free running
 }
 
 void ADC_enable()
@@ -30,6 +32,11 @@ void ADC_enable()
 void ADC_disable()
 {
 	ADCSRA  &= ~(1 << ADEN);		// Disable ADC
+}
+
+void ADC_clear_interrupt_flag()
+{
+	ADCSRA |= (1 << ADIF);			// Write 1 to flag to clear
 }
 
 void ADC_select_chanel(uint8_t channel)
@@ -53,13 +60,13 @@ uint8_t ADC_is_conversion_done()
 
 uint16_t ADC_get_conversion_result()
 {
+	ADC_clear_interrupt_flag();
 	return (ADCL | ADCH << 8);
-	//return ADC;
 }
 
-uint16_t ADC_read(uint8_t channel)
+uint16_t ADC_get_conversion(uint8_t channel)
 {
 	ADC_start_conversion(channel);
 	while(ADCSRA & (1<<ADSC));		// wait while conversion finishes
-	return ADC;
+	return ADC_get_conversion_result();
 }

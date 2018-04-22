@@ -14,8 +14,10 @@
 #include "tc2.h"
 #include "ADC_0.h"
 
-void device_init(void);
 
+
+void device_init(void);
+void i_o_init(void);
 
 
 #endif /* SETUP_H_ */
