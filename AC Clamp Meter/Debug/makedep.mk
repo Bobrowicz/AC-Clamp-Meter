@@ -12,3 +12,5 @@ src\tc0.c
 
 src\tc2.c
 
+src\usart.c
+

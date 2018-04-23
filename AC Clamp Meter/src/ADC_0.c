@@ -9,19 +9,20 @@
 
 void ADC_init()
 {
-	ADMUX  = (1 << REFS0)			// AVcc selected
-		   | (0 << ADLAR)			// Left Adjust Result disabled
-		   | (0 << MUX0);			// ADC Single Ended Input pin 0
+	ADMUX  = (1 << REFS0)			// Voltage Reference Selection: AVcc
+		   | (0 << ADLAR)			// Left Adjust Result: disabled
+		   | (0 << MUX0);			// Analog Channel Selection: Single Ended Input pin 0
 		   
-	ADCSRA  = (1 << ADEN)			// Enable ADC
+	ADCSRA  = (1 << ADEN)			// ADC Enable: enabled
+			| (1 << ADATE)			// ADC Auto Trigger: enabled
+			| (1 << ADIE)			// ADC Interrupt: enabled
 	        | (1 << ADPS2) 
 	        | (1 << ADPS1) 
-	        | (1 << ADPS0);		    // Prescaler set to clk/128
-	ADCSRA |= (0 << ADATE);			// Auto-trigger disabled
+	        | (1 << ADPS0);		    // ADC Prescaler Select: clk/128
 	
 	ADCSRB  = (0 << ADTS2)
-			| (0 << ADTS1)
-			| (0 << ADTS0);			// Trigger source: Free running
+			| (1 << ADTS1)
+			| (1 << ADTS0);			// ADC Auto Trigger Source: TC0 Compare Match A
 }
 
 void ADC_enable()
@@ -39,7 +40,7 @@ void ADC_clear_interrupt_flag()
 	ADCSRA |= (1 << ADIF);			// Write 1 to flag to clear
 }
 
-void ADC_select_chanel(uint8_t channel)
+void ADC_select_channel(uint8_t channel)
 {
 	channel &= 0b00001111;			// AND with 16
 	ADMUX = (ADMUX & 0xF0)			// Clear the bottom 4 bits

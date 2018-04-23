@@ -9,11 +9,11 @@
 #ifndef SETUP_H_
 #define SETUP_H_
 
-#include "pins.h"
+#include <pins.h>
 #include "tc0.h"
 #include "tc2.h"
 #include "ADC_0.h"
-
+#include <usart.h>
 
 
 void device_init(void);
