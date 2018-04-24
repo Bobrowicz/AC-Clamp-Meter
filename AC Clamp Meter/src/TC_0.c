@@ -4,9 +4,9 @@
  * Created: 4/21/2018 4:50:43 PM
  *  Author: peter
  */ 
-#include "tc0.h"
+#include <TC_0.h>
 
-void timer_0_init(void)
+void TIMER_0_init(void)
 {
 	TCCR0A |= (1 << WGM01); // Mode 2, Clear on Timer Compare
 	TCCR0B |= (1 << CS01) | (1 << CS00); // Prescaler set to clk/64

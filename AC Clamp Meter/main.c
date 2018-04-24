@@ -14,9 +14,6 @@
 #define MODE_CALCULATE 2
 #define MODE_DISPLAY 3
 
-uint8_t adc_channel = 0;
-volatile uint8_t mode = 0;
-
 
 int main(void)
 {
@@ -24,13 +21,13 @@ int main(void)
 	device_init();
 	sei();
 	
-	int num = 0;
-	long int sum = 0;
+	uint16_t v_in = 0;
+	uint_fast32_t sum = 0;
 	volatile int samples = 40;
 	volatile uint_fast32_t rms = 0;
 	
 	mode = MODE_IDLE;
-	ADC_select_channel(adc_channel);
+	ADC_0_select_channel(adc_channel);
 	
 	while (1)
 	{
@@ -38,9 +35,8 @@ int main(void)
 		{
 			case MODE_MEASURE:
 				//PORTD |= (1 << INSTRUMENTATION_OUT);
-				//num = ADC_get_conversion(adc_channel);
-				num = ADC_get_conversion_result();
-				sum += (num * num);
+				v_in = ADC_0_get_conversion_result();
+				sum += pow(v_in, 2);
 				samples -= 1;
 				if(samples == 0) {
 					mode = MODE_CALCULATE;
@@ -52,16 +48,13 @@ int main(void)
 				
 			case MODE_CALCULATE:
 				PORTD |= (1 << INSTRUMENTATION_OUT);
-				cli();
+				//cli();
 				rms = sum/40;
 				rms = sqrt(rms);
-				uint8_t i = 0;
-				for(i=0; i<2; i++){
-					USART_0_write((rms>>(i*8)) & 0xff);
-				}
+				send_two_bytes(rms);
 				sum = 0;
 				samples = 40;
-				sei();
+				//sei();
 				mode = MODE_IDLE;
 				PORTD &= ~(1 << INSTRUMENTATION_OUT);
 				break;
@@ -81,14 +74,20 @@ int main(void)
 	return 0;
 }
 
+void send_two_bytes(uint16_t bytes)
+{
+	uint8_t i = 0;
+	for(i = 0; i < 2; i++){
+		USART_0_write((bytes >> (i*8)) & 0xff);
+	}
+}
+
 ISR(TIMER0_COMPA_vect)
 {
-	//mode = MODE_MEASURE;
 	PORTD ^= (1 << ADC_CLK_OUT);
 }
 
 ISR(ADC_vect)
 {
 	mode = MODE_MEASURE;
-	//PORTD ^= (1 << INSTRUMENTATION_OUT);
 }

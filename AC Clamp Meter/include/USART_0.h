@@ -6,8 +6,8 @@
  */ 
 
 
-#ifndef USART_H_
-#define USART_H_
+#ifndef USART_0_H_
+#define USART_0_H_
 
 #include <stdbool.h>
 #include <avr/io.h>
@@ -21,7 +21,7 @@
  * \retval 0 the USART init was successful
  * \retval 1 the USART init was not successful
  */
-int8_t USART_0_init();
+int8_t USART_0_init(void);
 
 /**
  * \brief Enable RX and TX in USART_0
@@ -30,7 +30,7 @@ int8_t USART_0_init();
  *
  * \return Nothing
  */
-void USART_0_enable();
+void USART_0_enable(void);
 
 /**
  * \brief Enable RX in USART_0
@@ -39,7 +39,7 @@ void USART_0_enable();
  *
  * \return Nothing
  */
-void USART_0_enable_rx();
+void USART_0_enable_rx(void);
 
 /**
  * \brief Enable TX in USART_0
@@ -48,7 +48,7 @@ void USART_0_enable_rx();
  *
  * \return Nothing
  */
-void USART_0_enable_tx();
+void USART_0_enable_tx(void);
 
 /**
  * \brief Disable USART_0
@@ -57,14 +57,14 @@ void USART_0_enable_tx();
  *
  * \return Nothing
  */
-void USART_0_disable();
+void USART_0_disable(void);
 
 /**
  * \brief Get received data from USART_0
  *
  * \return Data register from USART_0 module
  */
-uint8_t USART_0_get_data();
+uint8_t USART_0_get_data(void);
 
 /**
  * \brief Check if the usart can accept data to be transmitted
@@ -73,7 +73,7 @@ uint8_t USART_0_get_data();
  * \retval false The USART can not receive data to be transmitted
  * \retval true The USART can receive data to be transmitted
  */
-bool USART_0_is_tx_ready();
+bool USART_0_is_tx_ready(void);
 
 /**
  * \brief Check if the USART has received data
@@ -82,7 +82,7 @@ bool USART_0_is_tx_ready();
  * \retval true The USART has received data
  * \retval false The USART has not received data
  */
-bool USART_0_is_rx_ready();
+bool USART_0_is_rx_ready(void);
 
 /**
  * \brief Check if USART_0 data is transmitted
@@ -91,7 +91,7 @@ bool USART_0_is_rx_ready();
  * \retval true  Data is not completely shifted out of the shift register
  * \retval false Data completely shifted out if the USART shift register
  */
-bool USART_0_is_tx_busy();
+bool USART_0_is_tx_busy(void);
 
 /**
  * \brief Read one character from USART_0
@@ -115,4 +115,4 @@ void USART_0_write(const uint8_t data);
 
 
 
-#endif /* USART_H_ */
+#endif /* USART_0_H_ */

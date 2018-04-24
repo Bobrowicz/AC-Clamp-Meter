@@ -6,13 +6,13 @@
  */ 
 
 
-#ifndef TC0_H_
-#define TC0_H_
+#ifndef TC_0_H_
+#define TC_0_H_
 
 
 #include <avr/io.h>
 
-void timer_0_init(void);
+void TIMER_0_init(void);
 
 
-#endif /* TC0_H_ */
+#endif /* TC_0_H_ */

@@ -16,4 +16,9 @@
 #include <clock_config.h>
 #include <setup.h>
 
+uint8_t adc_channel = 0;
+volatile uint8_t mode = 0;
+
+void send_two_bytes(uint16_t);
+
 #endif /* MAIN_H_ */

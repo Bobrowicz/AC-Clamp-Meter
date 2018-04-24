@@ -5,12 +5,12 @@
  *  Author: peter
  */ 
 
-#include "setup.h"
+#include <setup.h>
 
 void device_init()
 {
-	timer_0_init();
-	ADC_init();
+	TIMER_0_init();
+	ADC_0_init();
 	USART_0_init();
 }
 

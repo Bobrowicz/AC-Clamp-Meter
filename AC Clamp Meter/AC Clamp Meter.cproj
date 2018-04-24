@@ -150,13 +150,10 @@
     <Compile Include="include\setup.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="include\tc0.h">
+    <Compile Include="include\TC_0.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="include\tc2.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="include\usart.h">
+    <Compile Include="include\USART_0.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.c">
@@ -171,13 +168,10 @@
     <Compile Include="src\setup.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\tc0.c">
+    <Compile Include="src\TC_0.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\tc2.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\usart.c">
+    <Compile Include="src\USART_0.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
