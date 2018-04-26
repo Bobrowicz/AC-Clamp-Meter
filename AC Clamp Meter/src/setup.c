@@ -19,4 +19,5 @@ void i_o_init()
 	DDRD |= (1 << ADC_CLK_OUT);
 	DDRD |= (1 << INSTRUMENTATION_OUT);
 	DDRD |= (1 << ERROR);
+	DDRD |= (1 << DISPLAY);
 }
