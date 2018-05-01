@@ -13,6 +13,7 @@
 #include <TC_0.h>
 #include <ADC_0.h>
 #include <USART_0.h>
+#include <SPI_0.h>
 
 
 void device_init(void);

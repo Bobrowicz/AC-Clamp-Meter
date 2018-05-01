@@ -13,6 +13,6 @@
 #define ADC_CLK_OUT PD5
 #define INSTRUMENTATION_OUT PD6
 #define ERROR PD4
-#define DISPLAY PD7
+#define DISPLAY_CLR PD7
 
 #endif /* PINS_H_ */

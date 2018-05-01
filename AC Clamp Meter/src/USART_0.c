@@ -18,7 +18,7 @@ int8_t USART_0_init()
 
 	// Module is in UART mode
 	
-	#define BAUD 9600
+	#define BAUD 115200
 	#include <util/setbaud.h>
 	
 	/* Enable USART0 */
@@ -93,7 +93,6 @@ uint8_t USART_0_read()
 
 void USART_0_write(const uint8_t data)
 {
-	while (!(UCSR0A & (1 << UDRE0)))
-	;
 	UDR0 = data;
+	while (!(UCSR0A & (1 << UDRE0)));
 }
