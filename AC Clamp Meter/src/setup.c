@@ -17,8 +17,10 @@ void device_init()
 
 void i_o_init()
 {
-	DDRD |= (1 << ADC_CLK_OUT);
-	DDRD |= (1 << INSTRUMENTATION_OUT);
-	DDRD |= (1 << ERROR);
+	DDRC |= (1 << TIMER_OUT);
+	DDRC |= (1 << INSTRUMENTATION_OUT);
+	DDRD |= (1 << DISPLAY_DIGIT_TENTHS);
+	DDRD |= (1 << DISPLAY_DIGIT_ONES);
+	DDRD |= (1 << DISPLAY_DIGIT_TENS);
 	DDRD |= (1 << DISPLAY_CLR);
 }
