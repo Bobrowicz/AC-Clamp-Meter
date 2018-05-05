@@ -9,20 +9,20 @@
 #include "main.h"
 
 
-#define MODE_SYNC 0
+#define MODE_IDLE 0
 #define MODE_MEASURE 1
 #define MODE_CALCULATE 2
 #define MODE_UPDATE_DISPLAY 3
-#define MODE_REFRESH_DISPLAY 4
-#define MODE_DEBUG 5
+#define MODE_DEBUG 4
 
 uint8_t adc_channel = 0;
 volatile uint8_t mode = 0;
 volatile uint16_t timer_ticks = 0;
 volatile uint8_t disp_timer = 0;
 
-//static const float scale_factor = 0.9766;
-static const float scale_factor = 0.489;
+static const float scale_factor = 0.9766;
+
+uint32_t sum = 0;
 
 int main(void)
 {
@@ -31,20 +31,23 @@ int main(void)
 	device_init();
 	ADC_0_select_channel(adc_channel);
 	
+	
+	//uint16_t adc_reading = 0;
+	//uint32_t sum = 0;
+	//volatile uint8_t samples = 40;
+	volatile uint32_t rms = 0;
+
 	uint16_t timer_ticks_to_display_update = 600; // magic number for now. 600 * 416 us = 0.25 s
-	uint8_t display_refresh_ticks = 15;	// 15 * 416 us = 6.25 ms, higher values cause flicker
+	uint8_t display_refresh_ticks = 15;
 	
 	seven_segment_digit tenths_pace = {.enable_pin = DISPLAY_DIGIT_TENTHS};
 	seven_segment_digit ones_place = {.enable_pin = DISPLAY_DIGIT_ONES};
 	seven_segment_digit tens_place = {.enable_pin = DISPLAY_DIGIT_TENS};
-	seven_segment_digit digits[3] = {tenths_pace, ones_place, tens_place};
-		
-	uint32_t sum = 0;
-	uint16_t rms = 0;
+	seven_segment_digit digits_[3] = {tenths_pace, ones_place, tens_place};
 		
 	sei();
 
-	mode = MODE_SYNC;
+	mode = MODE_IDLE;
 	
 	while (1)
 	{
@@ -52,7 +55,7 @@ int main(void)
 		switch(mode)
 		{
 			
-			case MODE_SYNC:
+			case MODE_IDLE:
 				if (timer_ticks > timer_ticks_to_display_update) {
 					mode = MODE_UPDATE_DISPLAY;
 					timer_ticks = 0;
@@ -60,26 +63,43 @@ int main(void)
 				
 				if (disp_timer > display_refresh_ticks) {
 					disp_timer = 0;
-					mode = MODE_REFRESH_DISPLAY;
+					display_refresh(digits_);
 				}
 				break;
 			
 			/************************************************************************/
 			/* This case is executed when ADC has finished sampling the input and	*/
-			/* issued an interrupt.                                                 */
+			/* fired an interrupt.                                                  */
+			/* Performs first part of RMS calculation: sum(x^2)						*/
+			/* Decrementing counter keeps track how many samples remain             */
 			/************************************************************************/
 			case MODE_MEASURE:
-				//PORTC |= (1 << INSTRUMENTATION_OUT);
-				mode = mode_measure(&sum);
-				//PORTC &= ~(1 << INSTRUMENTATION_OUT);
+				mode = mode_measure();
+			/*
+				PORTC |= (1 << INSTRUMENTATION_OUT);
+				adc_reading = ADC_0_get_conversion_result();
+				sum += pow(adc_reading, 2);
+				samples -= 1;
+				if(samples == 0) {
+					mode = MODE_CALCULATE;
+					} else {
+					mode = MODE_IDLE;
+				}
+				PORTC &= ~(1 << INSTRUMENTATION_OUT);
+				*/
 				break;
 				
 			/************************************************************************/
-			/* This case is executed when all required samples have been taken.     */                                                    
+			/* This case is executed when all required samples have been taken.     */  
+			/* Performs second part of RMS calculation: sqrt(sum/n)                 */                                                  
 			/************************************************************************/	
 			case MODE_CALCULATE:
 				//PORTC |= (1 << INSTRUMENTATION_OUT);
-				mode = mode_calculate_rms(&sum, &rms);
+				rms = sum / 40;
+				rms = sqrt(rms);
+				sum = 0;
+				//samples = 40;
+				mode = MODE_IDLE;
 				//PORTC &= ~(1 << INSTRUMENTATION_OUT);
 				break;
 			
@@ -88,19 +108,12 @@ int main(void)
 			/* Updates buffer holding digits displayed on 7-segment                 */
 			/************************************************************************/	
 			case MODE_UPDATE_DISPLAY:
+				;
 				//PORTC |= (1 << INSTRUMENTATION_OUT);
-				mode = mode_update_display_buffer(digits, &rms);
-				//PORTC &= ~(1 << INSTRUMENTATION_OUT);
-				break;
+				uint16_t output_value = scale_output(rms);
+				extract_digits(output_value, digits_);
 				
-			/************************************************************************/
-			/* This case is executed every 6.25 ms.									*/
-			/* Visually determined this to be maximum refresh interval that does	*/
-			/* not produce flicker.                                                 */
-			/************************************************************************/
-			case MODE_REFRESH_DISPLAY:
-				//PORTC |= (1 << INSTRUMENTATION_OUT);
-				mode = refresh_display(digits);
+				mode = MODE_IDLE;
 				//PORTC &= ~(1 << INSTRUMENTATION_OUT);
 				break;
 				
@@ -117,53 +130,44 @@ int main(void)
 	return 0;
 }
 
-uint8_t mode_measure(uint32_t *sum)
+uint8_t mode_measure()
 {
 	static uint8_t samples = 40;
 	uint16_t adc_reading;
 	
 	adc_reading = ADC_0_get_conversion_result();
-	*sum += pow(adc_reading, 2);
+	sum += pow(adc_reading, 2);
 	samples -= 1;
 	if(samples == 0) {
 		samples = 40;
 		return MODE_CALCULATE;
 		} else {
-		return MODE_SYNC;
+		return MODE_IDLE;
 	}
 }
 
-uint8_t mode_calculate_rms(uint32_t *sum, uint16_t *rms)
+void display_refresh(seven_segment_digit *dig)
 {
-	//*rms = *sum / 40;
-	*rms = sqrt(*sum / 40);
-	*sum = 0;
-	return MODE_SYNC;
-}
-
-uint8_t mode_update_display_buffer(seven_segment_digit *digits, uint16_t *rms)
-{
-	uint16_t output_value = scale_output(*rms);
-	extract_digits(output_value, digits);
-	return MODE_SYNC;
-}
-
-uint8_t refresh_display(seven_segment_digit *dig)
-{
-	static uint8_t digit = 0;
+	static uint8_t d = 0;
+	//PORTC |= (1 << INSTRUMENTATION_OUT);
 	
-	PORTD &= ~(1 << dig[digit].enable_pin); // turn off power to current digit
-	PORTD &= ~(1 << DISPLAY_CLR);	// clear shift register - active low
-	PORTD |= (1 << DISPLAY_CLR);	
+	PORTD &= ~(1 << dig[d].enable_pin); // turn off power to current digit
 	
-	++digit;	// select next digit
-	if (digit > 2) {
-		digit = 0;
+	
+	PORTD &= ~(1 << DISPLAY_CLR);
+	PORTD |= (1 << DISPLAY_CLR);	// clear shift register
+	
+	++d;	// select next digit
+	if (d > 2) {
+		d = 0;
 	}
 	
-	SPI_0_write(dig[digit].bit_pattern);  // write data to shift register
-	PORTD |= (1 << dig[digit].enable_pin); // turn on power to the next digit
-	return MODE_SYNC;
+	SPI_0_write(dig[d].bit_pattern);  // write data to shift register
+	
+	PORTD |= (1 << dig[d].enable_pin); // turn on power to the next digit
+	//mode = MODE_IDLE;
+	
+	//PORTC &= ~(1 << INSTRUMENTATION_OUT);
 }
 
 uint8_t encode_digit(uint8_t digit)
