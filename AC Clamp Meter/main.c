@@ -21,8 +21,7 @@ volatile uint8_t mode = 0;
 volatile uint16_t timer_ticks = 0;
 volatile uint8_t disp_timer = 0;
 
-//static const float scale_factor = 0.9766;
-static const float scale_factor = 0.489;
+static const float scale_factor = 0.1;
 
 int main(void)
 {
@@ -80,7 +79,7 @@ int main(void)
 			case MODE_CALCULATE:
 				//PORTC |= (1 << INSTRUMENTATION_OUT);
 				mode = mode_calculate_rms(&sum, &rms);
-				//PORTC &= ~(1 << INSTRUMENTATION_OUT);
+				PORTC &= ~(1 << INSTRUMENTATION_OUT);
 				break;
 			
 			/************************************************************************/
@@ -120,9 +119,9 @@ int main(void)
 uint8_t mode_measure(uint32_t *sum)
 {
 	static uint8_t samples = 40;
-	uint16_t adc_reading;
+	int16_t adc_reading;
 	
-	adc_reading = ADC_0_get_conversion_result();
+	adc_reading = ADC_0_get_conversion_result() - 511;
 	*sum += pow(adc_reading, 2);
 	samples -= 1;
 	if(samples == 0) {
@@ -135,7 +134,6 @@ uint8_t mode_measure(uint32_t *sum)
 
 uint8_t mode_calculate_rms(uint32_t *sum, uint16_t *rms)
 {
-	//*rms = *sum / 40;
 	*rms = sqrt(*sum / 40);
 	*sum = 0;
 	return MODE_SYNC;
@@ -202,11 +200,6 @@ void send_digits(uint8_t *digits)
 		//SPI_0_write(encode_digit(digits[i]));
 	}
 }
-*/
-float scale_output(uint16_t adc_reading)
-{
-	return (round(adc_reading * scale_factor));
-}
 
 void send_two_bytes(uint16_t data)
 {
@@ -216,6 +209,11 @@ void send_two_bytes(uint16_t data)
 		USART_0_write((data >> (byte*8)) & 0xff);
 		//SPI_0_write((data >> (byte*8)) & 0xff);
 	}
+}
+*/
+float scale_output(uint16_t adc_reading)
+{
+	return (round(adc_reading * scale_factor));
 }
 
 ISR(TIMER0_COMPA_vect)

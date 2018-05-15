@@ -22,16 +22,17 @@ typedef struct {
 } seven_segment_digit;
 
 
-uint8_t encode_digit(uint8_t);
 
+
+uint8_t encode_digit(uint8_t);
 uint8_t mode_measure(uint32_t *);
 uint8_t mode_calculate_rms(uint32_t *, uint16_t *);
 uint8_t mode_update_display_buffer(seven_segment_digit *, uint16_t *);
 uint8_t refresh_display(seven_segment_digit *);
 void extract_digits(uint16_t, seven_segment_digit *);
-void send_digits(uint8_t *);
 float scale_output(uint16_t);
-void send_two_bytes(uint16_t);
 void shift_out(uint16_t);
+//void send_digits(uint8_t *);
+//void send_two_bytes(uint16_t);
 
 #endif /* MAIN_H_ */
